@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profesyonel Barkod Okuyucu</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
@@ -479,6 +480,72 @@
             } catch (err) {
                 console.error('Barkod okuyucu başlatma hatası:', err);
                 alert('Hata: Barkod okuyucu başlatılamadı.\n\nLütfen:\n1. Kamera izinlerini kontrol edin\n2. Bu sayfayı yenileyin (F5)\n3. Tarayıcınız kameraları destekliyor mu kontrol edin');
+            }
+
+            // Quagga.js başlat (1D barkodlar için - Codebar, Code39, Code128, EAN, vb.)
+            try {
+                console.log('Quagga 1D barkod tarayıcı başlatılıyor...');
+                
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: document.querySelector('#reader'),
+                        constraints: {
+                            facingMode: "environment",
+                            width: { min: 320 },
+                            height: { min: 240 }
+                        }
+                    },
+                    decoder: {
+                        readers: [
+                            "code_128_reader",
+                            "ean_reader",
+                            "ean_8_reader",
+                            "code_39_reader",
+                            "code_39_vin_reader",
+                            "codabar_reader",
+                            "upc_reader",
+                            "upc_e_reader",
+                            "i2of5_reader",
+                            "2of5_reader",
+                            "code_93_reader"
+                        ],
+                        debug: {
+                            showCanvas: false,
+                            showPatches: false,
+                            showFoundPatches: false,
+                            showSkeleton: false,
+                            showLabels: false,
+                            showCenterpoint: false,
+                            lineWidth: 2
+                        }
+                    },
+                    locale: "tr_TR",
+                    numOfWorkers: 4,
+                    frequency: 10
+                }, function(err) {
+                    if (err) {
+                        console.log("Quagga başlatma hatası:", err);
+                        return;
+                    }
+                    console.log("Quagga başarıyla başlatıldı");
+                    Quagga.start();
+
+                    Quagga.onDetected(function(result) {
+                        if (result.codeResult.code) {
+                            onScanSuccess(result.codeResult.code, {
+                                result: {
+                                    format: {
+                                        formatName: result.codeResult.format
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+            } catch (err) {
+                console.log('Quagga başlatma hatası (1D barkodlar için):', err);
             }
 
             // Kopyala butonu
