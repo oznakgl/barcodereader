@@ -2,9 +2,12 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>🔍 Barkod Okuyucu Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FF6B35">
+    <meta name="description" content="Profesyonel Barkod & QR Kod Okuyucu - Modern ve Hızlı">
+    <title>Barkod Okuyucu Pro</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
@@ -12,397 +15,581 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
         }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #FF4757;
+            --bg-light: #ffffff;
+            --bg-dark: #0F2027;
+            --text-light: #333333;
+            --text-dark: #ffffff;
+            --border-light: #e0e0e0;
+            --border-dark: #2C5364;
+            --success: #00D084;
+            --warning: #FFA502;
+            --error: #FF4757;
         }
 
         body {
             font-family: 'Roboto', sans-serif;
-            background: #0a0a0a;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
+            background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%);
+            color: var(--text-light);
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            transition: background 0.3s ease;
         }
 
-        .app-header {
-            background: linear-gradient(135deg, rgba(255,107,53,0.95), rgba(255,71,87,0.95));
-            padding: 10px 14px;
-            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        body.dark-mode {
+            background: linear-gradient(135deg, #0a1628 0%, #1a2633 50%, #1f3a47 100%);
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .scanner-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .sidebar {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            max-height: 100vh;
+            padding: 10px;
+        }
+
+        @media (max-width: 1024px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: auto;
+                overflow-y: visible;
+            }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            padding: 30px;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dark-mode .container {
+            background: rgba(20, 30, 50, 0.95);
+            color: var(--text-dark);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+        }
+
+        .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-shrink: 0;
-            z-index: 100;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex: 1;
+            gap: 15px;
         }
 
         .header-icon {
-            width: 36px;
-            height: 36px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #FF6B35, #FF4757);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: pulse-icon 2s infinite;
-        }
-
-        @keyframes pulse-icon {
-            0%, 100% { background: rgba(255, 255, 255, 0.2); }
-            50% { background: rgba(255, 255, 255, 0.35); }
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
         }
 
         .header-icon svg {
-            width: 20px;
-            height: 20px;
+            width: 30px;
+            height: 30px;
             color: white;
         }
 
-        .header-title h1 {
-            font-size: 17px;
+        h1 {
+            font-size: 28px;
             font-weight: 700;
-            color: white;
-            margin: 0;
+            color: var(--text-light);
         }
 
-        .header-title p {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.9);
-            margin: 2px 0 0 0;
+        .dark-mode h1 {
+            color: var(--text-dark);
         }
 
-        .header-stats {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 9px;
-            color: white;
-            font-weight: 600;
-        }
-
-        .main-container {
-            flex: 1;
+        .header-controls {
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-height: 0;
+            gap: 10px;
+            align-items: center;
         }
 
-        .scanner-section {
-            flex: 1;
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            background: #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 20px;
+        }
+
+        .dark-mode .btn-icon {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-dark);
+        }
+
+        .btn-icon:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
+
+        .dark-mode .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .scanner-wrapper {
             position: relative;
-            background: #000;
+            border-radius: 16px;
             overflow: hidden;
+            background: #000;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            aspect-ratio: 16 / 9;
         }
 
         #reader {
             width: 100%;
             height: 100%;
+            border: none;
         }
 
-        #reader video {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
+        #reader__dashboard_section_swaplink,
+        #reader__dashboard_section_fsr,
+        #reader__control_button_switch_flashlight,
+        #reader__control_button_switch_camera {
+            display: none !important;
+        }
+
+        #reader__dashboard_section_csr {
+            display: flex !important;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            flex-wrap: wrap;
+        }
+
+        #reader__dashboard_section_csr button {
+            background: linear-gradient(135deg, #FF6B35, #FF4757) !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 20px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            border-radius: 8px !important;
+            cursor: pointer !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+        }
+
+        #reader__dashboard_section_csr button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4) !important;
         }
 
         .laser-effect {
             position: absolute;
-            width: 85%;
+            width: 100%;
             height: 3px;
-            background: linear-gradient(90deg, transparent 0%, rgba(255, 100, 100, 1) 50%, transparent 100%);
+            background: linear-gradient(90deg, transparent, #FF0000, #FF3333, #FF0000, transparent);
             top: 50%;
-            left: 50%;
-            transform: translateX(-50%) translateY(-50%);
-            animation: laserScroll 1s ease-in-out infinite;
+            left: 0;
+            transform: translateY(-50%);
+            animation: laserScan 3s infinite;
             pointer-events: none;
-            box-shadow: 0 0 12px rgba(255, 100, 100, 1), 0 0 24px rgba(255, 0, 0, 0.8);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
             z-index: 10;
         }
 
-        @keyframes laserScroll {
-            0% { top: 10%; box-shadow: 0 0 8px rgba(255, 100, 100, 0.8); }
-            50% { top: 50%; box-shadow: 0 0 14px rgba(255, 255, 100, 1), 0 0 28px rgba(255, 100, 100, 1); }
-            100% { top: 90%; box-shadow: 0 0 8px rgba(255, 100, 100, 0.8); }
-        }
-
-        .scan-frame {
-            position: absolute;
-            width: 70%;
-            aspect-ratio: 1;
-            border: 2px dashed rgba(255, 107, 53, 0.5);
-            border-radius: 12px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 7;
-            animation: framePulse 2.5s ease-in-out infinite;
-        }
-
-        @keyframes framePulse {
-            0%, 100% { border-color: rgba(255, 107, 53, 0.3); box-shadow: none; }
-            50% { border-color: rgba(255, 107, 53, 0.7); box-shadow: 0 0 12px rgba(255, 107, 53, 0.5); }
+        @keyframes laserScan {
+            0% { top: 10%; }
+            50% { top: 50%; }
+            100% { top: 90%; }
         }
 
         .corner-marks {
             position: absolute;
             width: 100%;
             height: 100%;
+            top: 0;
+            left: 0;
             pointer-events: none;
-            z-index: 6;
+            z-index: 5;
         }
 
         .corner {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 2.5px solid rgba(255, 107, 53, 0.7);
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 107, 53, 0.6);
         }
 
-        .corner.top-left {
-            top: 50%;
-            left: 50%;
-            transform: translate(calc(-70vw / 2 - 10px), calc(-70vw / 2 - 10px));
-            border-right: none;
-            border-bottom: none;
+        .corner.top-left { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+        .corner.top-right { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+        .corner.bottom-left { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+        .corner.bottom-right { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+        #result {
+            margin-top: 20px;
+            display: none;
+            animation: slideIn 0.4s ease;
         }
 
-        .corner.top-right {
-            top: 50%;
-            left: 50%;
-            transform: translate(calc(70vw / 2 + 10px - 20px), calc(-70vw / 2 - 10px));
-            border-left: none;
-            border-bottom: none;
-        }
-
-        .corner.bottom-left {
-            top: 50%;
-            left: 50%;
-            transform: translate(calc(-70vw / 2 - 10px), calc(70vw / 2 + 10px - 20px));
-            border-right: none;
-            border-top: none;
-        }
-
-        .corner.bottom-right {
-            top: 50%;
-            left: 50%;
-            transform: translate(calc(70vw / 2 + 10px - 20px), calc(70vw / 2 + 10px - 20px));
-            border-left: none;
-            border-top: none;
-        }
-
-        .info-text {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.9);
-            background: rgba(0, 0, 0, 0.7);
-            padding: 7px 12px;
-            border-radius: 6px;
-            z-index: 8;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-4px); }
-        }
-
-        .result-panel {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease;
-            background: linear-gradient(135deg, #ffffff, #f5f5f5);
-            border-top: 2px solid #FF6B35;
-        }
-
-        .result-panel.show {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .result-inner {
-            padding: 12px;
-            color: #333;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .result-item {
-            margin-bottom: 10px;
-            background: white;
-            padding: 11px;
-            border-radius: 8px;
-            border-left: 4px solid #FF6B35;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            text-align: left;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #f5f5f5, #ffffff);
+            padding: 14px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .dark-mode .result-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--primary);
         }
 
         .result-item strong {
             display: block;
-            color: #FF6B35;
-            font-size: 10px;
+            margin-bottom: 6px;
+            color: #666;
+            font-size: 11px;
             text-transform: uppercase;
-            margin-bottom: 4px;
-            font-weight: 700;
-        }
-
-        .result-value {
-            word-wrap: break-word;
-            word-break: break-all;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            color: #222;
+            letter-spacing: 0.5px;
             font-weight: 600;
-            line-height: 1.4;
         }
 
-        .result-value a {
-            color: #0066cc;
+        .dark-mode .result-item strong {
+            color: #aaa;
+        }
+
+        #result-text, #result-format {
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        #result-text a {
+            color: var(--primary);
             text-decoration: none;
-            border-bottom: 2px solid #0066cc;
+            border-bottom: 2px solid var(--primary);
         }
 
-        .button-row {
+        .button-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 7px;
-            margin-top: 9px;
+            gap: 10px;
+            margin-top: 12px;
         }
 
-        .btn {
+        .copy-btn, .clear-btn {
             border: none;
-            padding: 10px 12px;
-            font-size: 12px;
+            padding: 10px 16px;
+            font-size: 13px;
             font-weight: 600;
-            border-radius: 7px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .btn-copy {
+        .copy-btn {
             background: linear-gradient(135deg, #FF6B35, #FF4757);
             color: white;
         }
 
-        .btn-copy:active {
-            transform: scale(0.95);
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
         }
 
-        .btn-approve {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-        }
-
-        .btn-approve:active {
-            transform: scale(0.95);
-        }
-
-        .status {
-            display: block;
-            background: linear-gradient(135deg, #FF6B35, #FF4757);
-            color: white;
-            padding: 6px;
-            border-radius: 6px;
-            font-size: 11px;
-            text-align: center;
-            margin-top: 8px;
-            font-weight: 600;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .history-panel {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease;
-            background: linear-gradient(135deg, #ffffff, #f9f9f9);
-            border-top: 2px solid #FF6B35;
-        }
-
-        .history-panel.show {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .history-inner {
-            padding: 12px;
+        .clear-btn {
+            background: #f0f0f0;
             color: #333;
         }
 
-        .history-header {
+        .dark-mode .clear-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-dark);
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-panel {
+            background: linear-gradient(135deg, #f5f5f5, #ffffff);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .dark-mode .stats-panel {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
         }
 
-        .history-title {
-            font-size: 12px;
+        .dark-mode .stat-row {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .dark-mode .stat-label {
+            color: #aaa;
+        }
+
+        .stat-value {
+            color: var(--primary);
             font-weight: 700;
-            color: #FF6B35;
         }
 
-        .history-count {
-            background: #FF6B35;
+        .settings-panel {
+            background: linear-gradient(135deg, #f5f5f5, #ffffff);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .dark-mode .settings-panel {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+
+        .dark-mode .setting-item {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: #ccc;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--success);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            left: 22px;
+        }
+
+        .history-panel {
+            background: linear-gradient(135deg, #f5f5f5, #ffffff);
+            border-radius: 12px;
+            overflow: hidden;
+            max-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dark-mode .history-panel {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .history-header {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #FF6B35, #FF4757);
             color: white;
-            padding: 2px 7px;
-            border-radius: 10px;
-            font-size: 9px;
             font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .history-list {
-            list-style: none;
+            overflow-y: auto;
+            flex: 1;
         }
 
         .history-item {
-            background: white;
-            padding: 8px;
-            margin: 6px 0;
-            border-radius: 6px;
-            border-left: 3px solid #FF6B35;
-            font-size: 11px;
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
+            padding: 10px 16px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .dark-mode .history-item {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .history-item:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .dark-mode .history-item:hover {
+            background: rgba(255, 107, 53, 0.2);
         }
 
         .history-item-text {
-            flex: 1;
-            word-break: break-all;
-            color: #222;
+            font-family: 'Courier New', monospace;
+            color: var(--primary);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .history-item-delete {
-            background: #f0f0f0;
+        .history-item-time {
+            color: #999;
+            font-size: 11px;
+        }
+
+        .empty-history {
+            padding: 24px 16px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .export-btn, .clear-history-btn {
+            width: 100%;
+            padding: 10px;
             border: none;
-            color: #f44;
-            padding: 2px 5px;
-            border-radius: 4px;
-            font-size: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #00D084, #00B070);
+            color: white;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 208, 132, 0.4);
+        }
+
+        .clear-history-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .dark-mode .clear-history-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-dark);
+        }
+
+        .clear-history-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            animation: slideInToast 0.3s ease, slideOutToast 0.3s ease 2.7s;
+            z-index: 1000;
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+
+        @keyframes slideInToast {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutToast {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
         }
 
         .modal {
@@ -413,442 +600,589 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
+            z-index: 2000;
             align-items: center;
             justify-content: center;
+            animation: fadeIn 0.3s ease;
         }
 
         .modal.active {
             display: flex;
         }
 
-        .modal-box {
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
             background: white;
-            border-radius: 14px;
-            padding: 18px;
-            max-width: 85%;
-            color: #333;
-            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
         }
 
-        .modal-header {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
+        .dark-mode .modal-content {
+            background: rgba(20, 30, 50, 0.95);
+            color: var(--text-dark);
         }
 
-        .modal-icon {
-            width: 32px;
-            height: 32px;
-            background: #FF6B35;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 18px;
-        }
-
-        .modal-title {
-            font-size: 15px;
-            font-weight: 700;
-            align-self: center;
-        }
-
-        .modal-text {
-            font-size: 12px;
-            background: #f9f9f9;
-            padding: 11px;
-            border-radius: 8px;
-            border-left: 4px solid #FF6B35;
-            margin-bottom: 12px;
-            word-break: break-all;
-            max-height: 140px;
-            overflow-y: auto;
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .modal-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         .modal-btn {
+            padding: 10px 16px;
             border: none;
-            padding: 10px 12px;
-            font-size: 12px;
+            border-radius: 8px;
             font-weight: 600;
-            border-radius: 7px;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .modal-yes {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
+        .modal-btn-confirm {
+            background: linear-gradient(135deg, #FF6B35, #FF4757);
             color: white;
         }
 
-        .modal-no {
+        .modal-btn-cancel {
             background: #f0f0f0;
             color: #333;
         }
 
-        ::-webkit-scrollbar {
-            width: 5px;
+        .dark-mode .modal-btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-dark);
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 107, 53, 0.5);
-            border-radius: 3px;
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        @media (max-width: 480px) {
-            .header-title h1 { font-size: 15px; }
-            .result-panel.show { max-height: 280px; }
-            .history-panel.show { max-height: 180px; }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
-        @media (orientation: landscape) {
-            .header-title h1 { font-size: 14px; }
-            .result-panel.show { max-height: 130px; }
-            .history-panel.show { max-height: 130px; }
-        }
-
-        .error-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            color: #333;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            z-index: 2000;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .error-message h2 {
-            color: #f44;
-            margin-bottom: 10px;
-        }
-
-        .error-message p {
-            font-size: 13px;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-
-        .error-message button {
-            background: #FF6B35;
+        .badge {
+            display: inline-block;
+            background: var(--primary);
             color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: 600;
+            margin-left: 8px;
         }
     </style>
 </head>
 <body>
 
-    <div class="app-header">
-        <div class="header-left">
-            <div class="header-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4m6 0h4a2 2 0 0 0 2-2v-4M9 7h6M9 17h6M6 6h.01M6 18h.01M18 6h.01M18 18h.01"></path>
-                </svg>
-            </div>
-            <div class="header-title">
-                <h1>🔍 Barkod Pro</h1>
-                <p>Akıllı Tarama Sistemi</p>
-            </div>
-        </div>
-        <div class="header-stats">
-            <span id="scanCount">0</span> Tarama
-        </div>
-    </div>
-
-    <div class="main-container">
+    <div class="app-container">
+        <!-- SCANNER SECTION -->
         <div class="scanner-section">
-            <div id="reader"></div>
-            <div class="scan-frame"></div>
-            <div class="laser-effect"></div>
-            <div class="corner-marks">
-                <div class="corner top-left"></div>
-                <div class="corner top-right"></div>
-                <div class="corner bottom-left"></div>
-                <div class="corner bottom-right"></div>
+            <div class="container">
+                <div class="header">
+                    <div class="header-left">
+                        <div class="header-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4m6 0h4a2 2 0 0 0 2-2v-4M9 7h6M9 17h6M6 6h.01M6 18h.01M18 6h.01M18 18h.01"></path>
+                            </svg>
+                        </div>
+                        <h1>Barkod Okuyucu</h1>
+                    </div>
+                    <div class="header-controls">
+                        <button class="btn-icon" id="themeToggle" title="Tema Değiştir">🌙</button>
+                        <button class="btn-icon" id="settingsBtn" title="Ayarlar">⚙️</button>
+                    </div>
+                </div>
+
+                <div class="scanner-wrapper">
+                    <div id="reader"></div>
+                    <div class="laser-effect"></div>
+                    <div class="corner-marks">
+                        <div class="corner top-left"></div>
+                        <div class="corner top-right"></div>
+                        <div class="corner bottom-left"></div>
+                        <div class="corner bottom-right"></div>
+                    </div>
+                </div>
+
+                <div id="result">
+                    <div class="result-item">
+                        <strong>📊 Okunan Veri</strong>
+                        <div id="result-text"></div>
+                    </div>
+                    <div class="result-item">
+                        <strong>🏷️ Barkod Tipi</strong>
+                        <div id="result-format"></div>
+                    </div>
+                    <div class="button-group">
+                        <button class="copy-btn" id="copyBtn">Kopyala</button>
+                        <button class="clear-btn" id="clearBtn">Temizle</button>
+                    </div>
+                </div>
             </div>
-            <div class="info-text">📱 Barkodu kareye yerleştir</div>
         </div>
 
-        <div class="result-panel" id="resultPanel">
-            <div class="result-inner">
-                <div class="result-item">
-                    <strong>📊 Okunan Veri</strong>
-                    <div class="result-value" id="resultText"></div>
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <!-- STATS PANEL -->
+            <div class="container stats-panel">
+                <div style="font-weight: 600; margin-bottom: 12px; font-size: 14px;">📈 İstatistikler</div>
+                <div class="stat-row">
+                    <span class="stat-label">Toplam Tarama</span>
+                    <span class="stat-value" id="totalScans">0</span>
                 </div>
-                <div class="result-item">
-                    <strong>🏷️ Barkod Tipi</strong>
-                    <div class="result-value" id="resultFormat"></div>
+                <div class="stat-row">
+                    <span class="stat-label">Bugün</span>
+                    <span class="stat-value" id="todayScans">0</span>
                 </div>
-                <div class="button-row">
-                    <button class="btn btn-copy" id="copyBtn">📋 Kopyala</button>
-                    <button class="btn btn-approve" id="approveBtn">✓ Onayla</button>
+                <div class="stat-row">
+                    <span class="stat-label">Son 1 Saat</span>
+                    <span class="stat-value" id="hourScans">0</span>
                 </div>
-                <div class="status">✓ Başarıyla Tarandı</div>
             </div>
-        </div>
 
-        <div class="history-panel" id="historyPanel">
-            <div class="history-inner">
+            <!-- SETTINGS PANEL -->
+            <div class="container settings-panel">
+                <div style="font-weight: 600; margin-bottom: 12px; font-size: 14px;">🎵 Ayarlar</div>
+                <div class="setting-item">
+                    <span>Başarı Sesi</span>
+                    <button class="toggle-switch active" id="soundToggle"></button>
+                </div>
+                <div class="setting-item">
+                    <span>Titreşim</span>
+                    <button class="toggle-switch active" id="vibrationToggle"></button>
+                </div>
+                <div class="setting-item">
+                    <span>Otomatik Kopyala</span>
+                    <button class="toggle-switch" id="autoCopyToggle"></button>
+                </div>
+            </div>
+
+            <!-- HISTORY PANEL -->
+            <div class="container history-panel">
                 <div class="history-header">
-                    <div class="history-title">📜 Onaylı Taramalar</div>
-                    <div class="history-count" id="historyCount">0</div>
+                    📜 Geçmiş <span id="historyCount">0</span>
                 </div>
-                <ul class="history-list" id="historyList"></ul>
+                <div class="history-list" id="historyList">
+                    <div class="empty-history">Henüz tarama yapılmadı</div>
+                </div>
+                <div style="padding: 12px;">
+                    <button class="export-btn" id="exportBtn">📥 CSV'ye Aktar</button>
+                    <button class="clear-history-btn" id="clearHistoryBtn">🗑️ Geçmişi Temizle</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="confirmModal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-icon">✓</div>
-                <div class="modal-title">Listeye Ekle?</div>
+    <!-- SETTINGS MODAL -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px;">Uygulama Ayarları</h2>
+            <div class="setting-item">
+                <span>Başarı Sesi</span>
+                <button class="toggle-switch active" id="soundToggleModal"></button>
             </div>
-            <div class="modal-text" id="modalText"></div>
+            <div class="setting-item">
+                <span>Titreşim Geri Bildirimi</span>
+                <button class="toggle-switch active" id="vibrationToggleModal"></button>
+            </div>
+            <div class="setting-item">
+                <span>Otomatik Kopyala</span>
+                <button class="toggle-switch" id="autoCopyToggleModal"></button>
+            </div>
             <div class="modal-buttons">
-                <button class="modal-btn modal-yes" id="modalYes">✓ Evet</button>
-                <button class="modal-btn modal-no" id="modalNo">✕ İptal</button>
+                <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('settingsModal').classList.remove('active')">Kapat</button>
             </div>
         </div>
     </div>
 
-    <div class="error-message" id="errorMsg" style="display: none;">
-        <h2>⚠️ Kamera Açılamadı</h2>
-        <p id="errorText"></p>
-        <button onclick="location.reload()">Yenile</button>
+    <!-- CLEAR HISTORY CONFIRMATION -->
+    <div class="modal" id="clearHistoryModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px;">Geçmişi Temizle?</h2>
+            <p style="color: #666; margin-bottom: 20px;">Bu işlem geri alınamaz. Tüm tarama geçmişi silinecektir.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('clearHistoryModal').classList.remove('active')">İptal</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmClearHistory()">Sil</button>
+            </div>
+        </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script>
-        const state = {
-            lastScanned: '',
-            lastTime: 0,
-            history: [],
-            pending: null,
-            scanner: null,
-            audio: null
+        // ==================== APP STATE ====================
+        const appState = {
+            lastScannedData: '',
+            history: JSON.parse(localStorage.getItem('scanHistory')) || [],
+            settings: JSON.parse(localStorage.getItem('appSettings')) || {
+                sound: true,
+                vibration: true,
+                autoCopy: false,
+                darkMode: false
+            },
+            html5QrcodeScanner: null,
+            isScanning: false
         };
 
-        const DOM = {
-            scanCount: document.getElementById('scanCount'),
-            resultPanel: document.getElementById('resultPanel'),
-            resultText: document.getElementById('resultText'),
-            resultFormat: document.getElementById('resultFormat'),
-            copyBtn: document.getElementById('copyBtn'),
-            approveBtn: document.getElementById('approveBtn'),
-            historyPanel: document.getElementById('historyPanel'),
-            historyList: document.getElementById('historyList'),
-            historyCount: document.getElementById('historyCount'),
-            modal: document.getElementById('confirmModal'),
-            modalText: document.getElementById('modalText'),
-            modalYes: document.getElementById('modalYes'),
-            modalNo: document.getElementById('modalNo'),
-            errorMsg: document.getElementById('errorMsg'),
-            errorText: document.getElementById('errorText')
-        };
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+            updateStats();
+            setupEventListeners();
+            startScanner();
+        });
 
-        function sanitize(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function initializeApp() {
+            // Apply theme
+            if (appState.settings.darkMode) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').textContent = '☀️';
+            }
+
+            // Sync settings with UI
+            updateSettingsUI();
+            loadHistory();
         }
 
-        function isUrl(str) {
+        function setupEventListeners() {
+            // Theme toggle
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+            // Settings
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                document.getElementById('settingsModal').classList.add('active');
+            });
+
+            // Settings toggles
+            const soundToggle = document.getElementById('soundToggle');
+            const vibrationToggle = document.getElementById('vibrationToggle');
+            const autoCopyToggle = document.getElementById('autoCopyToggle');
+
+            soundToggle.addEventListener('click', () => toggleSetting('sound', soundToggle));
+            vibrationToggle.addEventListener('click', () => toggleSetting('vibration', vibrationToggle));
+            autoCopyToggle.addEventListener('click', () => toggleSetting('autoCopy', autoCopyToggle));
+
+            // Modal settings
+            document.getElementById('soundToggleModal').addEventListener('click', function() {
+                toggleSetting('sound', this);
+                document.getElementById('soundToggle').classList.toggle('active');
+            });
+            document.getElementById('vibrationToggleModal').addEventListener('click', function() {
+                toggleSetting('vibration', this);
+                document.getElementById('vibrationToggle').classList.toggle('active');
+            });
+            document.getElementById('autoCopyToggleModal').addEventListener('click', function() {
+                toggleSetting('autoCopy', this);
+                document.getElementById('autoCopyToggle').classList.toggle('active');
+            });
+
+            // Result buttons
+            document.getElementById('copyBtn').addEventListener('click', copyResult);
+            document.getElementById('clearBtn').addEventListener('click', clearResult);
+
+            // History controls
+            document.getElementById('exportBtn').addEventListener('click', exportHistory);
+            document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+                document.getElementById('clearHistoryModal').classList.add('active');
+            });
+
+            // Modal close on background click
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.classList.remove('active');
+                });
+            });
+        }
+
+        function toggleTheme() {
+            appState.settings.darkMode = !appState.settings.darkMode;
+            document.body.classList.toggle('dark-mode');
+            document.getElementById('themeToggle').textContent = appState.settings.darkMode ? '☀️' : '🌙';
+            saveSettings();
+        }
+
+        function toggleSetting(setting, element) {
+            appState.settings[setting] = !appState.settings[setting];
+            element.classList.toggle('active');
+            saveSettings();
+            showToast(`${setting === 'sound' ? 'Ses' : setting === 'vibration' ? 'Titreşim' : 'Otomatik Kopyala'} ${appState.settings[setting] ? 'Açıldı' : 'Kapatıldı'}`);
+        }
+
+        function updateSettingsUI() {
+            const soundToggle = document.getElementById('soundToggle');
+            const vibrationToggle = document.getElementById('vibrationToggle');
+            const autoCopyToggle = document.getElementById('autoCopyToggle');
+            const soundToggleModal = document.getElementById('soundToggleModal');
+            const vibrationToggleModal = document.getElementById('vibrationToggleModal');
+            const autoCopyToggleModal = document.getElementById('autoCopyToggleModal');
+
+            if (appState.settings.sound) soundToggle.classList.add('active');
+            if (appState.settings.vibration) vibrationToggle.classList.add('active');
+            if (appState.settings.autoCopy) autoCopyToggle.classList.add('active');
+
+            if (appState.settings.sound) soundToggleModal.classList.add('active');
+            if (appState.settings.vibration) vibrationToggleModal.classList.add('active');
+            if (appState.settings.autoCopy) autoCopyToggleModal.classList.add('active');
+        }
+
+        function saveSettings() {
+            localStorage.setItem('appSettings', JSON.stringify(appState.settings));
+        }
+
+        // ==================== SCANNER ====================
+        function startScanner() {
             try {
-                new URL(str);
-                return true;
-            } catch {
-                return false;
+                appState.html5QrcodeScanner = new Html5QrcodeScanner(
+                    "reader",
+                    { 
+                        fps: 10,
+                        qrbox: { width: 280, height: 160 },
+                        facingMode: "environment",
+                        disableFlip: false,
+                        showTorchButtonIfSupported: true,
+                        highlightCodeOutline: true,
+                        rememberLastUsedCamera: true,
+                        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                    },
+                    false
+                );
+                
+                appState.html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+                appState.isScanning = true;
+            } catch (err) {
+                console.error('Scanner error:', err);
+                showToast('❌ Kamera başlatılamadı. Lütfen izinleri kontrol edin.');
             }
         }
 
-        function getTime() {
-            return new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function playBeep() {
-            try {
-                if (!state.audio) {
-                    state.audio = new (window.AudioContext || window.webkitAudioContext)();
+        function onScanSuccess(decodedText, decodedResult) {
+            if (decodedText !== appState.lastScannedData && decodedText.trim() !== '') {
+                appState.lastScannedData = decodedText;
+                const formatName = decodedResult?.result?.format?.formatName || 'QR Code';
+                
+                // Display result
+                const resultText = document.getElementById('result-text');
+                if (decodedText.startsWith('http://') || decodedText.startsWith('https://')) {
+                    resultText.innerHTML = `<a href="${decodedText}" target="_blank" rel="noopener noreferrer">${decodedText}</a>`;
+                } else {
+                    resultText.textContent = decodedText;
                 }
-                const t = state.audio.currentTime;
-                const o = state.audio.createOscillator();
-                const g = state.audio.createGain();
-                o.connect(g);
-                g.connect(state.audio.destination);
-                o.frequency.value = 800;
-                g.gain.setValueAtTime(0.15, t);
-                g.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
-                o.start(t);
-                o.stop(t + 0.08);
-            } catch (e) {}
+                
+                document.getElementById('result-format').textContent = formatName;
+                document.getElementById('result').style.display = 'block';
+
+                // Add to history
+                addToHistory(decodedText, formatName);
+
+                // Feedback
+                playSuccessSound();
+                playVibration();
+
+                // Auto-copy if enabled
+                if (appState.settings.autoCopy) {
+                    navigator.clipboard.writeText(decodedText);
+                }
+
+                // Show toast
+                showToast('✓ Barkod başarıyla tarandı');
+                updateStats();
+            }
         }
 
-        function loadHistory() {
+        function onScanFailure(error) {
+            // Silent fail
+        }
+
+        function playSuccessSound() {
+            if (!appState.settings.sound) return;
+
             try {
-                state.history = JSON.parse(localStorage.getItem('barcodes_pro') || '[]');
-            } catch {
-                state.history = [];
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                osc.frequency.value = 1000;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                
+                osc.start(audioContext.currentTime);
+                osc.stop(audioContext.currentTime + 0.15);
+            } catch (e) {
+                console.log('Ses oynatılamadı');
             }
-            updateScanCount();
+        }
+
+        function playVibration() {
+            if (!appState.settings.vibration || !navigator.vibrate) return;
+            navigator.vibrate([50, 30, 50]);
+        }
+
+        // ==================== HISTORY MANAGEMENT ====================
+        function addToHistory(data, format) {
+            const timestamp = new Date();
+            const historyItem = {
+                data,
+                format,
+                timestamp: timestamp.toISOString(),
+                id: Date.now()
+            };
+
+            appState.history.unshift(historyItem);
+            
+            // Keep last 100 items
+            if (appState.history.length > 100) {
+                appState.history.pop();
+            }
+
+            saveHistory();
+            loadHistory();
         }
 
         function saveHistory() {
-            try {
-                localStorage.setItem('barcodes_pro', JSON.stringify(state.history));
-            } catch {}
+            localStorage.setItem('scanHistory', JSON.stringify(appState.history));
         }
 
-        function addHistory(data) {
-            state.history.unshift({ data, time: getTime(), id: Date.now() });
-            if (state.history.length > 200) state.history.pop();
-            saveHistory();
-            updateScanCount();
-            drawHistory();
-        }
+        function loadHistory() {
+            const historyList = document.getElementById('historyList');
+            const historyCount = document.getElementById('historyCount');
 
-        function deleteFromHistory(id) {
-            state.history = state.history.filter(item => item.id !== id);
-            saveHistory();
-            updateScanCount();
-            drawHistory();
-        }
+            historyCount.textContent = appState.history.length;
 
-        function updateScanCount() {
-            DOM.scanCount.textContent = state.history.length;
-            DOM.historyCount.textContent = state.history.length;
-        }
-
-        function drawHistory() {
-            DOM.historyList.innerHTML = '';
-            if (state.history.length === 0) {
-                DOM.historyPanel.classList.remove('show');
+            if (appState.history.length === 0) {
+                historyList.innerHTML = '<div class="empty-history">Henüz tarama yapılmadı</div>';
                 return;
             }
-            DOM.historyPanel.classList.add('show');
-            state.history.slice(0, 20).forEach(item => {
-                const li = document.createElement('li');
-                li.className = 'history-item';
-                const txt = item.data.length > 25 ? item.data.substring(0, 25) + '...' : item.data;
-                li.innerHTML = `
-                    <div class="history-item-text" title="${sanitize(item.data)}">${sanitize(txt)}</div>
-                    <button class="history-item-delete" data-id="${item.id}">🗑</button>
-                `;
-                DOM.historyList.appendChild(li);
-            });
+
+            historyList.innerHTML = appState.history.map(item => `
+                <div class="history-item" onclick="pasteHistoryItem('${item.data}')">
+                    <div class="history-item-text" title="${item.data}">${item.data}</div>
+                    <div class="history-item-time">${new Date(item.timestamp).toLocaleTimeString('tr-TR')}</div>
+                </div>
+            `).join('');
         }
 
-        function onScan(text, result) {
-            const now = Date.now();
-            if (text === state.lastScanned && now - state.lastTime < 600) return;
-            if (!text?.trim()) return;
-
-            state.lastScanned = text;
-            state.lastTime = now;
-
-            const format = result?.result?.format?.formatName || 'Bilinmiyor';
-
-            if (isUrl(text)) {
-                DOM.resultText.innerHTML = `<a href="${text}" target="_blank" rel="noopener">${sanitize(text)}</a>`;
-            } else {
-                DOM.resultText.textContent = sanitize(text);
-            }
-
-            DOM.resultFormat.textContent = format;
-            DOM.resultPanel.classList.add('show');
-            playBeep();
+        function pasteHistoryItem(data) {
+            document.getElementById('result-text').textContent = data;
+            document.getElementById('result').style.display = 'block';
+            appState.lastScannedData = data;
+            showToast('✓ Geçmiş öğesi yüklendi');
         }
 
-        function showError(msg) {
-            DOM.errorText.textContent = msg;
-            DOM.errorMsg.style.display = 'block';
+        function exportHistory() {
+            if (appState.history.length === 0) {
+                showToast('❌ Aktarılacak veri yok');
+                return;
+            }
+
+            const csv = [
+                ['Tarama Tarihi', 'Saat', 'Barkod Tipi', 'Okunan Veri'].join(','),
+                ...appState.history.map(item => {
+                    const date = new Date(item.timestamp);
+                    return [
+                        date.toLocaleDateString('tr-TR'),
+                        date.toLocaleTimeString('tr-TR'),
+                        item.format,
+                        `"${item.data}"`
+                    ].join(',');
+                })
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `barkod-gecmis-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            showToast('✓ CSV dosyası indirildi');
         }
 
-        function initScanner() {
-            try {
-                const scanner = new Html5QrcodeScanner('reader', {
-                    fps: 15,
-                    qrbox: { width: 200, height: 200 },
-                    facingMode: 'environment',
-                    rememberLastUsedCamera: true,
-                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-                }, false);
-                state.scanner = scanner;
-                scanner.render(onScan, () => {});
-            } catch (e) {
-                console.error('Scanner Error:', e);
-                showError('Kamera başlatılamadı. Lütfen kamera izinlerini kontrol edin ve sayfayı yenileyin.');
-            }
-        }
-
-        // Events
-        DOM.copyBtn.addEventListener('click', () => {
-            if (!state.lastScanned) return;
-            navigator.clipboard.writeText(state.lastScanned).then(() => {
-                const orig = DOM.copyBtn.textContent;
-                DOM.copyBtn.textContent = '✓ Kopyalandı!';
-                setTimeout(() => { DOM.copyBtn.textContent = orig; }, 1000);
-            });
-        });
-
-        DOM.approveBtn.addEventListener('click', () => {
-            if (!state.lastScanned) return;
-            state.pending = state.lastScanned;
-            DOM.modalText.textContent = state.lastScanned;
-            DOM.modal.classList.add('active');
-        });
-
-        DOM.modalYes.addEventListener('click', () => {
-            if (state.pending) {
-                addHistory(state.pending);
-                DOM.modal.classList.remove('active');
-                DOM.resultPanel.classList.remove('show');
-                DOM.resultText.innerHTML = '';
-                DOM.resultFormat.textContent = '';
-                state.lastScanned = '';
-                state.pending = null;
-            }
-        });
-
-        DOM.modalNo.addEventListener('click', () => {
-            DOM.modal.classList.remove('active');
-        });
-
-        DOM.historyList.addEventListener('click', (e) => {
-            if (e.target.classList.contains('history-item-delete')) {
-                deleteFromHistory(parseInt(e.target.dataset.id));
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') DOM.modalNo.click();
-        });
-
-        // Init
-        document.addEventListener('DOMContentLoaded', () => {
+        function confirmClearHistory() {
+            appState.history = [];
+            saveHistory();
             loadHistory();
-            drawHistory();
-            initScanner();
-        });
+            updateStats();
+            document.getElementById('clearHistoryModal').classList.remove('active');
+            showToast('✓ Geçmiş temizlendi');
+        }
 
-        window.addEventListener('beforeunload', () => {
-            if (state.scanner) try { state.scanner.clear(); } catch (e) {}
-            if (state.audio) state.audio.close();
-        });
+        // ==================== STATISTICS ====================
+        function updateStats() {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+            const todayCount = appState.history.filter(item => 
+                new Date(item.timestamp) >= today
+            ).length;
+
+            const hourCount = appState.history.filter(item => 
+                new Date(item.timestamp) >= oneHourAgo
+            ).length;
+
+            document.getElementById('totalScans').textContent = appState.history.length;
+            document.getElementById('todayScans').textContent = todayCount;
+            document.getElementById('hourScans').textContent = hourCount;
+        }
+
+        // ==================== UI HELPERS ====================
+        function copyResult() {
+            const text = appState.lastScannedData;
+            if (!text) {
+                showToast('❌ Kopyalanacak veri yok');
+                return;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = '✓ Kopyalandı';
+                btn.style.opacity = '0.7';
+                setTimeout(() => {
+                    btn.textContent = 'Kopyala';
+                    btn.style.opacity = '1';
+                }, 2000);
+                showToast('✓ Panoya kopyalandı');
+            }).catch(err => {
+                showToast('❌ Kopyalama hatası');
+                console.error(err);
+            });
+        }
+
+        function clearResult() {
+            appState.lastScannedData = '';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('result-text').innerHTML = '';
+            document.getElementById('result-format').textContent = '';
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
     </script>
-
 </body>
 </html>
