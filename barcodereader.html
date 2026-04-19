@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profesyonel Barkod Okuyucu</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%);
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 550px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            padding: 40px;
+            text-align: center;
+            color: #333;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .header-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #FF6B35, #FF4757);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+        }
+
+        .header-icon svg {
+            width: 28px;
+            height: 28px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #999;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .scanner-wrapper {
+            position: relative;
+            margin: 30px 0;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        #reader {
+            width: 100%;
+            border: none;
+        }
+
+        /* Kütüphanenin arayüzünü gizleme */
+        #reader__dashboard_section_swaplink,
+        #reader__dashboard_section_fsr,
+        #reader__control_button_switch_flashlight,
+        #reader__control_button_switch_camera {
+            display: none !important;
+        }
+
+        #reader__dashboard_section_csr {
+            display: flex !important;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            flex-wrap: wrap;
+        }
+
+        #reader__dashboard_section_csr button {
+            background: linear-gradient(135deg, #FF6B35, #FF4757) !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 20px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            border-radius: 8px !important;
+            cursor: pointer !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+        }
+
+        #reader__dashboard_section_csr button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4) !important;
+        }
+
+        /* Lazer şerit efekti */
+        .laser-effect {
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #FF0000, #FF3333, #FF0000, transparent);
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            animation: laserScanVertical 3s infinite;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        @keyframes laserScanVertical {
+            0% {
+                top: 10%;
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
+            }
+            25% {
+                top: 35%;
+                box-shadow: 0 0 15px rgba(255, 0, 0, 1), 0 0 30px rgba(255, 0, 0, 0.8);
+            }
+            50% {
+                top: 50%;
+                box-shadow: 0 0 20px rgba(255, 0, 0, 1), 0 0 35px rgba(255, 0, 0, 0.9);
+            }
+            75% {
+                top: 65%;
+                box-shadow: 0 0 15px rgba(255, 0, 0, 1), 0 0 30px rgba(255, 0, 0, 0.8);
+            }
+            100% {
+                top: 90%;
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
+            }
+        }
+
+        /* Köşelerdeki açı işaretleri */
+        .corner-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 107, 53, 0.6);
+        }
+
+        .corner.top-left {
+            top: 10px;
+            left: 10px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner.top-right {
+            top: 10px;
+            right: 10px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner.bottom-left {
+            bottom: 10px;
+            left: 10px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner.bottom-right {
+            bottom: 10px;
+            right: 10px;
+            border-left: none;
+            border-top: none;
+        }
+
+        #result {
+            margin-top: 25px;
+            display: none;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item {
+            text-align: left;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #f5f5f5, #ffffff);
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid #FF6B35;
+        }
+
+        .result-item strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        #result-text, #result-format {
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            color: #FF6B35;
+            font-weight: 600;
+        }
+
+        #result-text a {
+            color: #FF6B35;
+            text-decoration: none;
+            border-bottom: 2px solid #FF6B35;
+            transition: background-color 0.3s;
+        }
+
+        #result-text a:hover {
+            background-color: rgba(255, 107, 53, 0.1);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .copy-btn, .clear-btn {
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #FF6B35, #FF4757);
+            color: white;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+        }
+
+        .clear-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .clear-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: #FF6B35;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4m6 0h4a2 2 0 0 0 2-2v-4M9 7h6M9 17h6M6 6h.01M6 18h.01M18 6h.01M18 18h.01"></path>
+                </svg>
+            </div>
+            <div>
+                <h1>Barkod Okuyucu</h1>
+                <p class="subtitle">QR & Barkod Taraması</p>
+            </div>
+        </div>
+
+        <div class="scanner-wrapper">
+            <div id="reader"></div>
+            <div class="laser-effect"></div>
+            <div class="corner-marks">
+                <div class="corner top-left"></div>
+                <div class="corner top-right"></div>
+                <div class="corner bottom-left"></div>
+                <div class="corner bottom-right"></div>
+            </div>
+        </div>
+
+        <p class="info-text">📱 Barkodu tarama alanının içine yerleştirin. Lazer ışın hizasında tutun.</p>
+
+        <div id="result">
+            <div class="result-item">
+                <strong>📊 Okunan Veri</strong>
+                <div id="result-text"></div>
+            </div>
+            <div class="result-item">
+                <strong>🏷️ Barkod Tipi</strong>
+                <div id="result-format"></div>
+            </div>
+            <div class="button-group">
+                <button class="copy-btn" id="copyBtn">Kopyala</button>
+                <button class="clear-btn" id="clearBtn">Temizle</button>
+            </div>
+            <div class="status-badge" id="successBadge">✓ Başarıyla Tarandı</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const resultContainer = document.getElementById('result');
+            const resultText = document.getElementById('result-text');
+            const resultFormat = document.getElementById('result-format');
+            const copyBtn = document.getElementById('copyBtn');
+            const clearBtn = document.getElementById('clearBtn');
+
+            let lastScannedData = '';
+            let html5QrcodeScanner = null;
+
+            function onScanSuccess(decodedText, decodedResult) {
+                if (decodedText !== lastScannedData && decodedText.trim() !== '') {
+                    lastScannedData = decodedText;
+                    const formatName = decodedResult?.result?.format?.formatName || 'Bilinmiyor';
+                    
+                    console.log(`Kod çözüldü = ${decodedText}`, decodedResult);
+                    
+                    // Veriyi göster
+                    if (decodedText.startsWith('http://') || decodedText.startsWith('https://')) {
+                        resultText.innerHTML = `<a href="${decodedText}" target="_blank" rel="noopener noreferrer">${decodedText}</a>`;
+                    } else {
+                        resultText.textContent = decodedText;
+                    }
+                    
+                    // Barkod tipini göster
+                    resultFormat.textContent = formatName;
+                    resultContainer.style.display = 'block';
+
+                    // Başarı sesini çal (opsiyonel)
+                    playSuccessSound();
+                }
+            }
+
+            function onScanFailure(error) {
+                // Hataları sessizce ele al
+            }
+
+            function playSuccessSound() {
+                try {
+                    // Web Audio API kullanarak bip sesi oluştur
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Birinci bip
+                    const osc1 = audioContext.createOscillator();
+                    const gain1 = audioContext.createGain();
+                    
+                    osc1.connect(gain1);
+                    gain1.connect(audioContext.destination);
+                    
+                    osc1.frequency.value = 1000;
+                    osc1.type = 'sine';
+                    gain1.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gain1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                    
+                    osc1.start(audioContext.currentTime);
+                    osc1.stop(audioContext.currentTime + 0.15);
+                    
+                    // İkinci bip (biraz daha yüksek ton)
+                    setTimeout(() => {
+                        try {
+                            const osc2 = audioContext.createOscillator();
+                            const gain2 = audioContext.createGain();
+                            
+                            osc2.connect(gain2);
+                            gain2.connect(audioContext.destination);
+                            
+                            osc2.frequency.value = 1200;
+                            osc2.type = 'sine';
+                            gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
+                            gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                            
+                            osc2.start(audioContext.currentTime);
+                            osc2.stop(audioContext.currentTime + 0.15);
+                        } catch (e) {
+                            console.log('İkinci bip oynatılamadı:', e);
+                        }
+                    }, 150);
+                } catch (e) {
+                    console.log('Ses oynatılamadı:', e);
+                }
+            }
+
+            // Kütüphaneyi oluştur - Kamera izni iste
+            try {
+                console.log('Barkod okuyucu başlatılıyor...');
+                
+                html5QrcodeScanner = new Html5QrcodeScanner(
+                    "reader",
+                    { 
+                        fps: 10,
+                        qrbox: { width: 280, height: 160 },
+                        facingMode: "environment",
+                        disableFlip: false,
+                        showTorchButtonIfSupported: true,
+                        highlightCodeOutline: true,
+                        rememberLastUsedCamera: true,
+                        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                    },
+                    false
+                );
+                
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+                console.log('Barkod okuyucu başarıyla başlatıldı');
+            } catch (err) {
+                console.error('Barkod okuyucu başlatma hatası:', err);
+                alert('Hata: Barkod okuyucu başlatılamadı.\n\nLütfen:\n1. Kamera izinlerini kontrol edin\n2. Bu sayfayı yenileyin (F5)\n3. Tarayıcınız kameraları destekliyor mu kontrol edin');
+            }
+
+            // Kopyala butonu
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(lastScannedData).then(() => {
+                    copyBtn.textContent = '✓ Kopyalandı';
+                    copyBtn.style.opacity = '0.7';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Kopyala';
+                        copyBtn.style.opacity = '1';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Kopyalama hatası:', err);
+                });
+            });
+
+            // Temizle butonu
+            clearBtn.addEventListener('click', () => {
+                lastScannedData = '';
+                resultContainer.style.display = 'none';
+                resultText.innerHTML = '';
+                resultFormat.textContent = '';
+            });
+        });
+    </script>
+</body>
+</html>
