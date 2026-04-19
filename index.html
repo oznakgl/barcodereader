@@ -2,10 +2,10 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profesyonel Barkod Okuyucu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Barkod Okuyucu</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
@@ -13,305 +13,309 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
 
         body {
             font-family: 'Roboto', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%);
+            background: #0a0a0a;
             color: #fff;
-            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            -webkit-text-size-adjust: 100%;
         }
 
-        .container {
-            width: 100%;
-            max-width: 550px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            padding: 40px;
-            text-align: center;
-            color: #333;
-        }
-
-        .header {
+        /* HEADER */
+        .app-header {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 10px 14px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 10px;
+            flex-shrink: 0;
+            z-index: 100;
         }
 
         .header-icon {
-            width: 44px;
-            height: 44px;
+            width: 32px;
+            height: 32px;
             background: linear-gradient(135deg, #FF6B35, #FF4757);
-            border-radius: 12px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+            flex-shrink: 0;
         }
 
         .header-icon svg {
-            width: 28px;
-            height: 28px;
+            width: 18px;
+            height: 18px;
             color: white;
         }
 
-        h1 {
-            font-size: 28px;
+        .header-title {
+            flex: 1;
+        }
+
+        .header-title h1 {
+            font-size: 16px;
             font-weight: 700;
             color: #222;
+            margin: 0;
         }
 
-        .subtitle {
-            font-size: 13px;
+        .header-title p {
+            font-size: 10px;
             color: #999;
-            margin-top: 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            margin: 2px 0 0 0;
         }
 
-        .scanner-wrapper {
-            position: relative;
-            margin: 30px 0;
-            border-radius: 16px;
+        /* MAIN */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
+            min-height: 0;
+        }
+
+        /* SCANNER */
+        .scanner-section {
+            flex: 1;
+            position: relative;
             background: #000;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            min-height: 0;
         }
 
         #reader {
             width: 100%;
-            border: none;
+            height: 100%;
         }
 
-        /* Kütüphanenin arayüzünü gizleme */
+        #reader video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+        }
+
         #reader__dashboard_section_swaplink,
         #reader__dashboard_section_fsr,
         #reader__control_button_switch_flashlight,
-        #reader__control_button_switch_camera {
+        #reader__control_button_switch_camera,
+        #reader__scan_qr_button,
+        #reader__dashboard_section_csr {
             display: none !important;
         }
 
-        #reader__dashboard_section_csr {
-            display: flex !important;
-            justify-content: center;
-            gap: 10px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.8);
-            flex-wrap: wrap;
-        }
-
-        #reader__dashboard_section_csr button {
-            background: linear-gradient(135deg, #FF6B35, #FF4757) !important;
-            color: white !important;
-            border: none !important;
-            padding: 10px 20px !important;
-            font-size: 13px !important;
-            font-weight: 600 !important;
-            border-radius: 8px !important;
-            cursor: pointer !important;
-            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-        }
-
-        #reader__dashboard_section_csr button:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4) !important;
-        }
-
-        /* Lazer şerit efekti */
+        /* LASER - HIZLI (1.2 sn) */
         .laser-effect {
             position: absolute;
             width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #FF0000, #FF3333, #FF0000, transparent);
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 0, 0, 0) 10%, 
+                rgba(255, 50, 50, 1) 50%, 
+                rgba(255, 0, 0, 0) 90%, 
+                transparent 100%);
             top: 50%;
             left: 0;
             transform: translateY(-50%);
-            animation: laserScanVertical 3s infinite;
+            animation: laserMoveDown 1.2s ease-in-out infinite;
             pointer-events: none;
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
+            box-shadow: 0 0 8px rgba(255, 0, 0, 0.9), 0 0 16px rgba(255, 0, 0, 0.6);
             z-index: 10;
         }
 
-        @keyframes laserScanVertical {
+        @keyframes laserMoveDown {
             0% {
-                top: 10%;
-                box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
-            }
-            25% {
-                top: 35%;
-                box-shadow: 0 0 15px rgba(255, 0, 0, 1), 0 0 30px rgba(255, 0, 0, 0.8);
+                top: 12%;
+                box-shadow: 0 0 6px rgba(255, 0, 0, 0.7), 0 0 12px rgba(255, 0, 0, 0.4);
             }
             50% {
                 top: 50%;
-                box-shadow: 0 0 20px rgba(255, 0, 0, 1), 0 0 35px rgba(255, 0, 0, 0.9);
-            }
-            75% {
-                top: 65%;
-                box-shadow: 0 0 15px rgba(255, 0, 0, 1), 0 0 30px rgba(255, 0, 0, 0.8);
+                box-shadow: 0 0 10px rgba(255, 0, 0, 1), 0 0 20px rgba(255, 0, 0, 0.7);
             }
             100% {
-                top: 90%;
-                box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
+                top: 88%;
+                box-shadow: 0 0 6px rgba(255, 0, 0, 0.7), 0 0 12px rgba(255, 0, 0, 0.4);
             }
         }
 
-        /* Köşelerdeki açı işaretleri */
+        /* CORNERS */
         .corner-marks {
             position: absolute;
             width: 100%;
             height: 100%;
-            top: 0;
-            left: 0;
             pointer-events: none;
             z-index: 5;
         }
 
         .corner {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            border: 3px solid rgba(255, 107, 53, 0.6);
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 107, 53, 0.5);
         }
 
         .corner.top-left {
-            top: 10px;
-            left: 10px;
+            top: 4px;
+            left: 4px;
             border-right: none;
             border-bottom: none;
         }
 
         .corner.top-right {
-            top: 10px;
-            right: 10px;
+            top: 4px;
+            right: 4px;
             border-left: none;
             border-bottom: none;
         }
 
         .corner.bottom-left {
-            bottom: 10px;
-            left: 10px;
+            bottom: 4px;
+            left: 4px;
             border-right: none;
             border-top: none;
         }
 
         .corner.bottom-right {
-            bottom: 10px;
-            right: 10px;
+            bottom: 4px;
+            right: 4px;
             border-left: none;
             border-top: none;
         }
 
-        #result {
-            margin-top: 25px;
-            display: none;
-            animation: slideIn 0.4s ease;
+        .info-text {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 8px;
+            border-radius: 4px;
+            z-index: 8;
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* RESULT PANEL */
+        .result-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        .result-panel.show {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .result-inner {
+            padding: 10px;
+            color: #333;
         }
 
         .result-item {
-            text-align: left;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, #f5f5f5, #ffffff);
-            padding: 16px;
-            border-radius: 12px;
-            border-left: 4px solid #FF6B35;
+            margin-bottom: 9px;
+            background: linear-gradient(135deg, #f9f9f9, #ffffff);
+            padding: 9px;
+            border-radius: 6px;
+            border-left: 3px solid #FF6B35;
         }
 
         .result-item strong {
             display: block;
-            margin-bottom: 8px;
             color: #666;
-            font-size: 12px;
+            font-size: 9px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            margin-bottom: 3px;
             font-weight: 600;
         }
 
-        #result-text, #result-format {
+        .result-value {
             word-wrap: break-word;
-            font-family: 'Courier New', monospace;
-            font-size: 15px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
             color: #FF6B35;
             font-weight: 600;
+            line-height: 1.3;
         }
 
-        #result-text a {
-            color: #FF6B35;
+        .result-value a {
+            color: #0066cc;
             text-decoration: none;
-            border-bottom: 2px solid #FF6B35;
-            transition: background-color 0.3s;
+            border-bottom: 1px solid #0066cc;
         }
 
-        #result-text a:hover {
-            background-color: rgba(255, 107, 53, 0.1);
-        }
-
-        .button-group {
+        /* BUTTONS */
+        .button-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 15px;
+            gap: 6px;
+            margin-top: 8px;
         }
 
-        .copy-btn, .clear-btn {
+        .btn {
             border: none;
-            padding: 12px 20px;
-            font-size: 14px;
+            padding: 8px 10px;
+            font-size: 11px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            touch-action: manipulation;
         }
 
-        .copy-btn {
+        .btn-copy {
             background: linear-gradient(135deg, #FF6B35, #FF4757);
             color: white;
         }
 
-        .copy-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+        .btn-copy:active {
+            transform: scale(0.96);
         }
 
-        .clear-btn {
-            background: #f0f0f0;
-            color: #333;
+        .btn-approve {
+            background: #4CAF50;
+            color: white;
         }
 
-        .clear-btn:hover {
-            background: #e0e0e0;
-            transform: translateY(-2px);
+        .btn-approve:active {
+            transform: scale(0.96);
         }
 
-        .status-badge {
-            display: inline-block;
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status {
+            display: block;
             background: #FF6B35;
             color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 10px;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 10px;
+            text-align: center;
+            margin-top: 7px;
             animation: pulse 2s infinite;
         }
 
@@ -320,30 +324,203 @@
             50% { opacity: 0.6; }
         }
 
-        .info-text {
-            font-size: 12px;
+        /* HISTORY */
+        .history-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        .history-panel.show {
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .history-inner {
+            padding: 10px;
+            color: #333;
+        }
+
+        .history-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #FF6B35;
+            margin-bottom: 7px;
+        }
+
+        .history-list {
+            list-style: none;
+        }
+
+        .history-item {
+            background: #f9f9f9;
+            padding: 7px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 2px solid #FF6B35;
+            font-size: 10px;
+            line-height: 1.3;
+            word-break: break-all;
+        }
+
+        .history-time {
+            font-size: 8px;
             color: #999;
-            margin-top: 15px;
-            line-height: 1.6;
+            margin-top: 2px;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            max-width: 85%;
+            color: #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.25s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .modal-text {
+            font-size: 11px;
+            background: #f9f9f9;
+            padding: 9px;
+            border-radius: 5px;
+            border-left: 3px solid #FF6B35;
+            margin-bottom: 10px;
+            word-break: break-all;
+            font-family: monospace;
+            line-height: 1.4;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .modal-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .modal-btn {
+            border: none;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .modal-yes {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .modal-yes:active {
+            transform: scale(0.96);
+        }
+
+        .modal-no {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-no:active {
+            background: #e0e0e0;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #FF6B35;
+            border-radius: 2px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .header-title h1 {
+                font-size: 15px;
+            }
+
+            .result-panel.show,
+            .history-panel.show {
+                max-height: 240px;
+            }
+        }
+
+        @media (orientation: landscape) {
+            .app-header {
+                padding: 8px 10px;
+            }
+
+            .result-panel.show,
+            .history-panel.show {
+                max-height: 140px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <div class="header-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4m6 0h4a2 2 0 0 0 2-2v-4M9 7h6M9 17h6M6 6h.01M6 18h.01M18 6h.01M18 18h.01"></path>
-                </svg>
-            </div>
-            <div>
-                <h1>Barkod Okuyucu</h1>
-                <p class="subtitle">QR & Barkod Taraması</p>
-            </div>
+    <!-- HEADER -->
+    <div class="app-header">
+        <div class="header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4m6 0h4a2 2 0 0 0 2-2v-4M9 7h6M9 17h6M6 6h.01M6 18h.01M18 6h.01M18 18h.01"></path>
+            </svg>
         </div>
+        <div class="header-title">
+            <h1>Barkod Okuyucu</h1>
+            <p>QR & Barkod Taraması</p>
+        </div>
+    </div>
 
-        <div class="scanner-wrapper">
+    <!-- MAIN -->
+    <div class="main-container">
+        <!-- SCANNER -->
+        <div class="scanner-section">
             <div id="reader"></div>
             <div class="laser-effect"></div>
             <div class="corner-marks">
@@ -352,224 +529,243 @@
                 <div class="corner bottom-left"></div>
                 <div class="corner bottom-right"></div>
             </div>
+            <div class="info-text">📱 Barkodu ekrana yerleştir</div>
         </div>
 
-        <p class="info-text">📱 Barkodu tarama alanının içine yerleştirin. Lazer ışın hizasında tutun.</p>
+        <!-- RESULT -->
+        <div class="result-panel" id="resultPanel">
+            <div class="result-inner">
+                <div class="result-item">
+                    <strong>📊 Okunan Veri</strong>
+                    <div class="result-value" id="resultText"></div>
+                </div>
+                <div class="result-item">
+                    <strong>🏷️ Barkod Tipi</strong>
+                    <div class="result-value" id="resultFormat"></div>
+                </div>
+                <div class="button-row">
+                    <button class="btn btn-copy" id="copyBtn">📋 Kopyala</button>
+                    <button class="btn btn-approve" id="approveBtn">✓ Onayla</button>
+                </div>
+                <div class="status">✓ Tarandı</div>
+            </div>
+        </div>
 
-        <div id="result">
-            <div class="result-item">
-                <strong>📊 Okunan Veri</strong>
-                <div id="result-text"></div>
+        <!-- HISTORY -->
+        <div class="history-panel" id="historyPanel">
+            <div class="history-inner">
+                <div class="history-title">📜 Onaylı Taramalar</div>
+                <ul class="history-list" id="historyList"></ul>
             </div>
-            <div class="result-item">
-                <strong>🏷️ Barkod Tipi</strong>
-                <div id="result-format"></div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-box">
+            <div class="modal-title">Listeye Ekle?</div>
+            <div class="modal-text" id="modalText"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-yes" id="modalYes">✓ Evet</button>
+                <button class="modal-btn modal-no" id="modalNo">✕ İptal</button>
             </div>
-            <div class="button-group">
-                <button class="copy-btn" id="copyBtn">Kopyala</button>
-                <button class="clear-btn" id="clearBtn">Temizle</button>
-            </div>
-            <div class="status-badge" id="successBadge">✓ Başarıyla Tarandı</div>
         </div>
     </div>
 
     <script>
+        const state = {
+            lastScanned: '',
+            lastTime: 0,
+            history: [],
+            pending: null,
+            scanner: null,
+            audio: null
+        };
+
+        const DOM = {
+            resultPanel: document.getElementById('resultPanel'),
+            resultText: document.getElementById('resultText'),
+            resultFormat: document.getElementById('resultFormat'),
+            copyBtn: document.getElementById('copyBtn'),
+            approveBtn: document.getElementById('approveBtn'),
+            historyPanel: document.getElementById('historyPanel'),
+            historyList: document.getElementById('historyList'),
+            modal: document.getElementById('confirmModal'),
+            modalText: document.getElementById('modalText'),
+            modalYes: document.getElementById('modalYes'),
+            modalNo: document.getElementById('modalNo')
+        };
+
+        // Utilities
+        function sanitize(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function isUrl(str) {
+            return str.startsWith('http://') || str.startsWith('https://');
+        }
+
+        function getTime() {
+            return new Date().toLocaleTimeString('tr-TR', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+        }
+
+        // Sound
+        function playBeep() {
+            try {
+                if (!state.audio) {
+                    state.audio = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const t = state.audio.currentTime;
+                const o = state.audio.createOscillator();
+                const g = state.audio.createGain();
+                o.connect(g);
+                g.connect(state.audio.destination);
+                o.frequency.value = 800;
+                g.gain.setValueAtTime(0.15, t);
+                g.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+                o.start(t);
+                o.stop(t + 0.08);
+            } catch (e) {}
+        }
+
+        // History
+        function loadHistory() {
+            try {
+                state.history = JSON.parse(localStorage.getItem('barcodes') || '[]');
+            } catch {
+                state.history = [];
+            }
+        }
+
+        function saveHistory() {
+            try {
+                localStorage.setItem('barcodes', JSON.stringify(state.history));
+            } catch {}
+        }
+
+        function addHistory(data) {
+            state.history.unshift({ data, time: new Date() });
+            if (state.history.length > 100) state.history.pop();
+            saveHistory();
+            drawHistory();
+        }
+
+        function drawHistory() {
+            DOM.historyList.innerHTML = '';
+            if (state.history.length === 0) {
+                DOM.historyPanel.classList.remove('show');
+                return;
+            }
+            DOM.historyPanel.classList.add('show');
+            state.history.slice(0, 15).forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                const txt = item.data.length > 30 ? item.data.substring(0, 30) + '...' : item.data;
+                li.innerHTML = `${sanitize(txt)}<div class="history-time">${getTime()}</div>`;
+                DOM.historyList.appendChild(li);
+            });
+        }
+
+        // Scan
+        function onScan(text, result) {
+            const now = Date.now();
+            if (text === state.lastScanned && now - state.lastTime < 600) return;
+            if (!text?.trim()) return;
+
+            state.lastScanned = text;
+            state.lastTime = now;
+
+            const format = result?.result?.format?.formatName || 'Bilinmiyor';
+
+            if (isUrl(text)) {
+                DOM.resultText.innerHTML = `<a href="${text}" target="_blank" rel="noopener">${sanitize(text)}</a>`;
+            } else {
+                DOM.resultText.textContent = sanitize(text);
+            }
+
+            DOM.resultFormat.textContent = format;
+            DOM.resultPanel.classList.add('show');
+            playBeep();
+        }
+
+        function initScanner() {
+            try {
+                const scanner = new Html5QrcodeScanner('reader', {
+                    fps: 15,
+                    qrbox: { width: 180, height: 180 },
+                    facingMode: 'environment',
+                    rememberLastUsedCamera: true,
+                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                }, false);
+                state.scanner = scanner;
+                scanner.render(onScan, () => {});
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Events
+        DOM.copyBtn.addEventListener('click', () => {
+            if (!state.lastScanned) return;
+            navigator.clipboard.writeText(state.lastScanned).then(() => {
+                const orig = DOM.copyBtn.textContent;
+                DOM.copyBtn.textContent = '✓ Kopyalandı';
+                DOM.copyBtn.disabled = true;
+                setTimeout(() => {
+                    DOM.copyBtn.textContent = orig;
+                    DOM.copyBtn.disabled = false;
+                }, 1200);
+            }).catch(() => {});
+        });
+
+        DOM.approveBtn.addEventListener('click', () => {
+            if (!state.lastScanned) return;
+            state.pending = state.lastScanned;
+            DOM.modalText.textContent = state.lastScanned;
+            DOM.modal.classList.add('active');
+        });
+
+        DOM.modalYes.addEventListener('click', () => {
+            if (state.pending) {
+                addHistory(state.pending);
+                DOM.modal.classList.remove('active');
+                DOM.resultPanel.classList.remove('show');
+                DOM.resultText.innerHTML = '';
+                DOM.resultFormat.textContent = '';
+                state.lastScanned = '';
+                state.pending = null;
+            }
+        });
+
+        DOM.modalNo.addEventListener('click', () => {
+            DOM.modal.classList.remove('active');
+            state.pending = null;
+        });
+
+        DOM.modal.addEventListener('click', (e) => {
+            if (e.target === DOM.modal) {
+                DOM.modalNo.click();
+            }
+        });
+
+        // Init
         document.addEventListener('DOMContentLoaded', () => {
-            const resultContainer = document.getElementById('result');
-            const resultText = document.getElementById('result-text');
-            const resultFormat = document.getElementById('result-format');
-            const copyBtn = document.getElementById('copyBtn');
-            const clearBtn = document.getElementById('clearBtn');
+            loadHistory();
+            drawHistory();
+            initScanner();
+        });
 
-            let lastScannedData = '';
-            let html5QrcodeScanner = null;
-
-            function onScanSuccess(decodedText, decodedResult) {
-                if (decodedText !== lastScannedData && decodedText.trim() !== '') {
-                    lastScannedData = decodedText;
-                    const formatName = decodedResult?.result?.format?.formatName || 'Bilinmiyor';
-                    
-                    console.log(`Kod çözüldü = ${decodedText}`, decodedResult);
-                    
-                    // Veriyi göster
-                    if (decodedText.startsWith('http://') || decodedText.startsWith('https://')) {
-                        resultText.innerHTML = `<a href="${decodedText}" target="_blank" rel="noopener noreferrer">${decodedText}</a>`;
-                    } else {
-                        resultText.textContent = decodedText;
-                    }
-                    
-                    // Barkod tipini göster
-                    resultFormat.textContent = formatName;
-                    resultContainer.style.display = 'block';
-
-                    // Başarı sesini çal (opsiyonel)
-                    playSuccessSound();
-                }
-            }
-
-            function onScanFailure(error) {
-                // Hataları sessizce ele al
-            }
-
-            function playSuccessSound() {
-                try {
-                    // Web Audio API kullanarak bip sesi oluştur
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    
-                    // Birinci bip
-                    const osc1 = audioContext.createOscillator();
-                    const gain1 = audioContext.createGain();
-                    
-                    osc1.connect(gain1);
-                    gain1.connect(audioContext.destination);
-                    
-                    osc1.frequency.value = 1000;
-                    osc1.type = 'sine';
-                    gain1.gain.setValueAtTime(0.3, audioContext.currentTime);
-                    gain1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
-                    
-                    osc1.start(audioContext.currentTime);
-                    osc1.stop(audioContext.currentTime + 0.15);
-                    
-                    // İkinci bip (biraz daha yüksek ton)
-                    setTimeout(() => {
-                        try {
-                            const osc2 = audioContext.createOscillator();
-                            const gain2 = audioContext.createGain();
-                            
-                            osc2.connect(gain2);
-                            gain2.connect(audioContext.destination);
-                            
-                            osc2.frequency.value = 1200;
-                            osc2.type = 'sine';
-                            gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
-                            gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
-                            
-                            osc2.start(audioContext.currentTime);
-                            osc2.stop(audioContext.currentTime + 0.15);
-                        } catch (e) {
-                            console.log('İkinci bip oynatılamadı:', e);
-                        }
-                    }, 150);
-                } catch (e) {
-                    console.log('Ses oynatılamadı:', e);
-                }
-            }
-
-            // Kütüphaneyi oluştur - Kamera izni iste
-            try {
-                console.log('Barkod okuyucu başlatılıyor...');
-                
-                html5QrcodeScanner = new Html5QrcodeScanner(
-                    "reader",
-                    { 
-                        fps: 10,
-                        qrbox: { width: 280, height: 160 },
-                        facingMode: "environment",
-                        disableFlip: false,
-                        showTorchButtonIfSupported: true,
-                        highlightCodeOutline: true,
-                        rememberLastUsedCamera: true,
-                        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-                    },
-                    false
-                );
-                
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-                console.log('Barkod okuyucu başarıyla başlatıldı');
-            } catch (err) {
-                console.error('Barkod okuyucu başlatma hatası:', err);
-                alert('Hata: Barkod okuyucu başlatılamadı.\n\nLütfen:\n1. Kamera izinlerini kontrol edin\n2. Bu sayfayı yenileyin (F5)\n3. Tarayıcınız kameraları destekliyor mu kontrol edin');
-            }
-
-            // Quagga.js başlat (1D barkodlar için - Codebar, Code39, Code128, EAN, vb.)
-            try {
-                console.log('Quagga 1D barkod tarayıcı başlatılıyor...');
-                
-                Quagga.init({
-                    inputStream: {
-                        name: "Live",
-                        type: "LiveStream",
-                        target: document.querySelector('#reader'),
-                        constraints: {
-                            facingMode: "environment",
-                            width: { min: 320 },
-                            height: { min: 240 }
-                        }
-                    },
-                    decoder: {
-                        readers: [
-                            "code_128_reader",
-                            "ean_reader",
-                            "ean_8_reader",
-                            "code_39_reader",
-                            "code_39_vin_reader",
-                            "codabar_reader",
-                            "upc_reader",
-                            "upc_e_reader",
-                            "i2of5_reader",
-                            "2of5_reader",
-                            "code_93_reader"
-                        ],
-                        debug: {
-                            showCanvas: false,
-                            showPatches: false,
-                            showFoundPatches: false,
-                            showSkeleton: false,
-                            showLabels: false,
-                            showCenterpoint: false,
-                            lineWidth: 2
-                        }
-                    },
-                    locale: "tr_TR",
-                    numOfWorkers: 4,
-                    frequency: 10
-                }, function(err) {
-                    if (err) {
-                        console.log("Quagga başlatma hatası:", err);
-                        return;
-                    }
-                    console.log("Quagga başarıyla başlatıldı");
-                    Quagga.start();
-
-                    Quagga.onDetected(function(result) {
-                        if (result.codeResult.code) {
-                            onScanSuccess(result.codeResult.code, {
-                                result: {
-                                    format: {
-                                        formatName: result.codeResult.format
-                                    }
-                                }
-                            });
-                        }
-                    });
-                });
-            } catch (err) {
-                console.log('Quagga başlatma hatası (1D barkodlar için):', err);
-            }
-
-            // Kopyala butonu
-            copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(lastScannedData).then(() => {
-                    copyBtn.textContent = '✓ Kopyalandı';
-                    copyBtn.style.opacity = '0.7';
-                    setTimeout(() => {
-                        copyBtn.textContent = 'Kopyala';
-                        copyBtn.style.opacity = '1';
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Kopyalama hatası:', err);
-                });
-            });
-
-            // Temizle butonu
-            clearBtn.addEventListener('click', () => {
-                lastScannedData = '';
-                resultContainer.style.display = 'none';
-                resultText.innerHTML = '';
-                resultFormat.textContent = '';
-            });
+        window.addEventListener('beforeunload', () => {
+            if (state.scanner) try { state.scanner.clear(); } catch (e) {}
+            if (state.audio) state.audio.close();
         });
     </script>
+
 </body>
 </html>
