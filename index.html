@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Barkod Okuyucu</title>
+    <title>🔍 Barkod Okuyucu Pro</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
@@ -33,32 +33,46 @@
             -webkit-text-size-adjust: 100%;
         }
 
-        /* HEADER */
+        /* ═══════ HEADER ═══════ */
         .app-header {
-            background: rgba(255, 255, 255, 0.98);
+            background: linear-gradient(135deg, rgba(255,107,53,0.95), rgba(255,71,87,0.95));
             padding: 10px 14px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
             flex-shrink: 0;
             z-index: 100;
         }
 
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
         .header-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #FF6B35, #FF4757);
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            animation: pulse-icon 2s infinite;
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% { background: rgba(255, 255, 255, 0.2); }
+            50% { background: rgba(255, 255, 255, 0.35); }
         }
 
         .header-icon svg {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             color: white;
         }
 
@@ -67,19 +81,31 @@
         }
 
         .header-title h1 {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 700;
-            color: #222;
+            color: white;
             margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .header-title p {
             font-size: 10px;
-            color: #999;
+            color: rgba(255, 255, 255, 0.9);
             margin: 2px 0 0 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
-        /* MAIN */
+        .header-stats {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 9px;
+            color: white;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* ═══════ MAIN ═══════ */
         .main-container {
             flex: 1;
             display: flex;
@@ -88,13 +114,16 @@
             min-height: 0;
         }
 
-        /* SCANNER */
+        /* ═══════ SCANNER ═══════ */
         .scanner-section {
             flex: 1;
             position: relative;
             background: #000;
             overflow: hidden;
             min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #reader {
@@ -117,171 +146,249 @@
             display: none !important;
         }
 
-        /* LASER - HIZLI (1.2 sn) */
+        /* ═══════ LASER EFFECT ═══════ */
         .laser-effect {
             position: absolute;
-            width: 100%;
-            height: 2px;
+            width: 85%;
+            height: 3px;
             background: linear-gradient(90deg, 
                 transparent 0%, 
-                rgba(255, 0, 0, 0) 10%, 
-                rgba(255, 50, 50, 1) 50%, 
-                rgba(255, 0, 0, 0) 90%, 
+                rgba(255, 0, 0, 0.3) 10%, 
+                rgba(255, 100, 100, 1) 40%,
+                rgba(255, 255, 100, 1) 50%,
+                rgba(255, 100, 100, 1) 60%,
+                rgba(255, 0, 0, 0.3) 90%, 
                 transparent 100%);
             top: 50%;
-            left: 0;
-            transform: translateY(-50%);
-            animation: laserMoveDown 1.2s ease-in-out infinite;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            animation: laserScroll 1s ease-in-out infinite;
             pointer-events: none;
-            box-shadow: 0 0 8px rgba(255, 0, 0, 0.9), 0 0 16px rgba(255, 0, 0, 0.6);
+            box-shadow: 0 0 12px rgba(255, 100, 100, 1), 
+                        0 0 24px rgba(255, 0, 0, 0.8),
+                        0 0 36px rgba(255, 50, 50, 0.5);
             z-index: 10;
+            border-radius: 50%;
         }
 
-        @keyframes laserMoveDown {
+        @keyframes laserScroll {
             0% {
-                top: 12%;
-                box-shadow: 0 0 6px rgba(255, 0, 0, 0.7), 0 0 12px rgba(255, 0, 0, 0.4);
+                top: 10%;
+                box-shadow: 0 0 8px rgba(255, 100, 100, 0.8), 
+                            0 0 16px rgba(255, 0, 0, 0.6);
+            }
+            25% {
+                box-shadow: 0 0 12px rgba(255, 100, 100, 1), 
+                            0 0 24px rgba(255, 0, 0, 0.8),
+                            0 0 36px rgba(255, 50, 50, 0.5);
             }
             50% {
                 top: 50%;
-                box-shadow: 0 0 10px rgba(255, 0, 0, 1), 0 0 20px rgba(255, 0, 0, 0.7);
+                box-shadow: 0 0 14px rgba(255, 255, 100, 1), 
+                            0 0 28px rgba(255, 100, 100, 1),
+                            0 0 40px rgba(255, 50, 50, 0.6);
+            }
+            75% {
+                box-shadow: 0 0 12px rgba(255, 100, 100, 1), 
+                            0 0 24px rgba(255, 0, 0, 0.8),
+                            0 0 36px rgba(255, 50, 50, 0.5);
             }
             100% {
-                top: 88%;
-                box-shadow: 0 0 6px rgba(255, 0, 0, 0.7), 0 0 12px rgba(255, 0, 0, 0.4);
+                top: 90%;
+                box-shadow: 0 0 8px rgba(255, 100, 100, 0.8), 
+                            0 0 16px rgba(255, 0, 0, 0.6);
             }
         }
 
-        /* CORNERS */
+        /* ═══════ SCANNER FRAME ═══════ */
+        .scan-frame {
+            position: absolute;
+            width: 70%;
+            aspect-ratio: 1;
+            border: 2px dashed rgba(255, 107, 53, 0.5);
+            border-radius: 12px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 7;
+            animation: framePulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes framePulse {
+            0%, 100% { 
+                border-color: rgba(255, 107, 53, 0.3);
+                box-shadow: 0 0 0 0 rgba(255, 107, 53, 0);
+            }
+            50% { 
+                border-color: rgba(255, 107, 53, 0.7);
+                box-shadow: 0 0 12px rgba(255, 107, 53, 0.5);
+            }
+        }
+
+        /* ═══════ CORNERS ═══════ */
         .corner-marks {
             position: absolute;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 5;
+            z-index: 6;
         }
 
         .corner {
             position: absolute;
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(255, 107, 53, 0.5);
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid rgba(255, 107, 53, 0.7);
         }
 
         .corner.top-left {
-            top: 4px;
-            left: 4px;
+            top: 50%;
+            left: 50%;
+            transform: translate(calc(-70vw / 2 - 10px), calc(-70vw / 2 - 10px));
             border-right: none;
             border-bottom: none;
         }
 
         .corner.top-right {
-            top: 4px;
-            right: 4px;
+            top: 50%;
+            left: 50%;
+            transform: translate(calc(70vw / 2 + 10px - 20px), calc(-70vw / 2 - 10px));
             border-left: none;
             border-bottom: none;
         }
 
         .corner.bottom-left {
-            bottom: 4px;
-            left: 4px;
+            top: 50%;
+            left: 50%;
+            transform: translate(calc(-70vw / 2 - 10px), calc(70vw / 2 + 10px - 20px));
             border-right: none;
             border-top: none;
         }
 
         .corner.bottom-right {
-            bottom: 4px;
-            right: 4px;
+            top: 50%;
+            left: 50%;
+            transform: translate(calc(70vw / 2 + 10px - 20px), calc(70vw / 2 + 10px - 20px));
             border-left: none;
             border-top: none;
         }
 
+        /* ═══════ INFO TEXT ═══════ */
         .info-text {
             position: absolute;
-            bottom: 10px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.8);
-            background: rgba(0, 0, 0, 0.6);
-            padding: 5px 8px;
-            border-radius: 4px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 7px 12px;
+            border-radius: 6px;
             z-index: 8;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            animation: float 3s ease-in-out infinite;
         }
 
-        /* RESULT PANEL */
+        @keyframes float {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-4px); }
+        }
+
+        /* ═══════ RESULT PANEL ═══════ */
         .result-panel {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            background: white;
-            border-top: 1px solid #ddd;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #ffffff, #f5f5f5);
+            border-top: 2px solid #FF6B35;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .result-panel.show {
-            max-height: 280px;
+            max-height: 300px;
             overflow-y: auto;
         }
 
         .result-inner {
-            padding: 10px;
+            padding: 12px;
             color: #333;
         }
 
         .result-item {
-            margin-bottom: 9px;
-            background: linear-gradient(135deg, #f9f9f9, #ffffff);
-            padding: 9px;
-            border-radius: 6px;
-            border-left: 3px solid #FF6B35;
+            margin-bottom: 10px;
+            background: white;
+            padding: 11px;
+            border-radius: 8px;
+            border-left: 4px solid #FF6B35;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            animation: slideInResult 0.3s ease-out;
+        }
+
+        @keyframes slideInResult {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .result-item strong {
             display: block;
-            color: #666;
-            font-size: 9px;
+            color: #FF6B35;
+            font-size: 10px;
             text-transform: uppercase;
-            margin-bottom: 3px;
-            font-weight: 600;
+            margin-bottom: 4px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .result-value {
             word-wrap: break-word;
             word-break: break-all;
-            font-family: monospace;
-            font-size: 12px;
-            color: #FF6B35;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #222;
             font-weight: 600;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
         .result-value a {
             color: #0066cc;
             text-decoration: none;
-            border-bottom: 1px solid #0066cc;
+            border-bottom: 2px solid #0066cc;
+            transition: all 0.2s;
         }
 
-        /* BUTTONS */
+        .result-value a:active {
+            background-color: rgba(0, 102, 204, 0.1);
+        }
+
+        /* ═══════ BUTTONS ═══════ */
         .button-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin-top: 8px;
+            gap: 7px;
+            margin-top: 9px;
         }
 
         .btn {
             border: none;
-            padding: 8px 10px;
-            font-size: 11px;
+            padding: 10px 12px;
+            font-size: 12px;
             font-weight: 600;
-            border-radius: 6px;
+            border-radius: 7px;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 5px;
             touch-action: manipulation;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .btn-copy {
@@ -290,16 +397,18 @@
         }
 
         .btn-copy:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
         }
 
         .btn-approve {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
         }
 
         .btn-approve:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
         }
 
         .btn:disabled {
@@ -309,45 +418,62 @@
 
         .status {
             display: block;
-            background: #FF6B35;
+            background: linear-gradient(135deg, #FF6B35, #FF4757);
             color: white;
-            padding: 5px;
-            border-radius: 4px;
-            font-size: 10px;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 11px;
             text-align: center;
-            margin-top: 7px;
+            margin-top: 8px;
+            font-weight: 600;
             animation: pulse 2s infinite;
+            box-shadow: 0 2px 6px rgba(255, 71, 87, 0.2);
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.02); }
         }
 
-        /* HISTORY */
+        /* ═══════ HISTORY PANEL ═══════ */
         .history-panel {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            background: white;
-            border-top: 1px solid #ddd;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #ffffff, #f9f9f9);
+            border-top: 2px solid #FF6B35;
         }
 
         .history-panel.show {
-            max-height: 180px;
+            max-height: 200px;
             overflow-y: auto;
         }
 
         .history-inner {
-            padding: 10px;
+            padding: 12px;
             color: #333;
         }
 
+        .history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
         .history-title {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             color: #FF6B35;
-            margin-bottom: 7px;
+        }
+
+        .history-count {
+            background: #FF6B35;
+            color: white;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 600;
         }
 
         .history-list {
@@ -355,23 +481,63 @@
         }
 
         .history-item {
-            background: #f9f9f9;
-            padding: 7px;
-            margin: 5px 0;
-            border-radius: 5px;
-            border-left: 2px solid #FF6B35;
-            font-size: 10px;
+            background: white;
+            padding: 8px;
+            margin: 6px 0;
+            border-radius: 6px;
+            border-left: 3px solid #FF6B35;
+            font-size: 11px;
             line-height: 1.3;
             word-break: break-all;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            animation: slideInItem 0.3s ease-out;
         }
 
-        .history-time {
-            font-size: 8px;
+        @keyframes slideInItem {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .history-item-text {
+            flex: 1;
+            color: #222;
+            font-weight: 500;
+        }
+
+        .history-item-time {
+            font-size: 9px;
             color: #999;
-            margin-top: 2px;
+            flex-shrink: 0;
+            font-weight: 600;
         }
 
-        /* MODAL */
+        .history-item-delete {
+            background: #f0f0f0;
+            border: none;
+            color: #f44;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .history-item-delete:active {
+            background: #f44;
+            color: white;
+        }
+
+        /* ═══════ MODAL ═══════ */
         .modal {
             display: none;
             position: fixed;
@@ -379,29 +545,36 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(3px);
         }
 
         .modal.active {
             display: flex;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal-box {
             background: white;
-            border-radius: 10px;
-            padding: 16px;
+            border-radius: 14px;
+            padding: 18px;
             max-width: 85%;
             color: #333;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.25s ease-out;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+            animation: slideUpModal 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        @keyframes slideUp {
+        @keyframes slideUpModal {
             from {
-                transform: translateY(30px);
+                transform: translateY(40px);
                 opacity: 0;
             }
             to {
@@ -410,49 +583,69 @@
             }
         }
 
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .modal-icon {
+            width: 32px;
+            height: 32px;
+            background: #FF6B35;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
         .modal-title {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 700;
-            margin-bottom: 10px;
+            color: #222;
         }
 
         .modal-text {
-            font-size: 11px;
+            font-size: 12px;
             background: #f9f9f9;
-            padding: 9px;
-            border-radius: 5px;
-            border-left: 3px solid #FF6B35;
-            margin-bottom: 10px;
+            padding: 11px;
+            border-radius: 8px;
+            border-left: 4px solid #FF6B35;
+            margin-bottom: 12px;
             word-break: break-all;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             line-height: 1.4;
-            max-height: 120px;
+            max-height: 140px;
             overflow-y: auto;
+            color: #222;
         }
 
         .modal-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px;
+            gap: 8px;
         }
 
         .modal-btn {
             border: none;
-            padding: 8px;
-            font-size: 11px;
+            padding: 10px 12px;
+            font-size: 12px;
             font-weight: 600;
-            border-radius: 5px;
+            border-radius: 7px;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         .modal-yes {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
         }
 
         .modal-yes:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
         }
 
         .modal-no {
@@ -464,40 +657,78 @@
             background: #e0e0e0;
         }
 
-        /* SCROLLBAR */
+        /* ═══════ SCROLLBAR ═══════ */
         ::-webkit-scrollbar {
-            width: 4px;
+            width: 5px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: transparent;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #FF6B35;
-            border-radius: 2px;
+            background: rgba(255, 107, 53, 0.5);
+            border-radius: 3px;
         }
 
-        /* RESPONSIVE */
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 107, 53, 0.8);
+        }
+
+        /* ═══════ RESPONSIVE ═══════ */
         @media (max-width: 480px) {
             .header-title h1 {
                 font-size: 15px;
             }
 
-            .result-panel.show,
+            .result-panel.show {
+                max-height: 280px;
+            }
+
             .history-panel.show {
-                max-height: 240px;
+                max-height: 180px;
             }
         }
 
         @media (orientation: landscape) {
             .app-header {
-                padding: 8px 10px;
+                padding: 8px 12px;
+            }
+
+            .header-title h1 {
+                font-size: 14px;
             }
 
             .result-panel.show,
             .history-panel.show {
-                max-height: 140px;
+                max-height: 130px;
+            }
+
+            .info-text {
+                font-size: 8px;
+                padding: 5px 10px;
+            }
+        }
+
+        /* ═══════ DARK MODE ═══════ */
+        @media (prefers-color-scheme: dark) {
+            .result-inner, .history-inner {
+                color: #f0f0f0;
+            }
+
+            .result-item, .history-item {
+                background: #1a1a1a;
+                color: #f0f0f0;
+            }
+
+            .modal-box {
+                background: #1a1a1a;
+                color: #f0f0f0;
+            }
+
+            .modal-text {
+                background: #2a2a2a;
+                color: #f0f0f0;
             }
         }
     </style>
@@ -506,14 +737,19 @@
 
     <!-- HEADER -->
     <div class="app-header">
-        <div class="header-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4m6 0h4a2 2 0 0 0 2-2v-4M9 7h6M9 17h6M6 6h.01M6 18h.01M18 6h.01M18 18h.01"></path>
-            </svg>
+        <div class="header-left">
+            <div class="header-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4m6 0h4a2 2 0 0 0 2-2v-4M9 7h6M9 17h6M6 6h.01M6 18h.01M18 6h.01M18 18h.01"></path>
+                </svg>
+            </div>
+            <div class="header-title">
+                <h1>🔍 Barkod Pro</h1>
+                <p>Akıllı Tarama Sistemi</p>
+            </div>
         </div>
-        <div class="header-title">
-            <h1>Barkod Okuyucu</h1>
-            <p>QR & Barkod Taraması</p>
+        <div class="header-stats">
+            <span id="scanCount">0</span> Tarama
         </div>
     </div>
 
@@ -522,6 +758,7 @@
         <!-- SCANNER -->
         <div class="scanner-section">
             <div id="reader"></div>
+            <div class="scan-frame"></div>
             <div class="laser-effect"></div>
             <div class="corner-marks">
                 <div class="corner top-left"></div>
@@ -529,7 +766,7 @@
                 <div class="corner bottom-left"></div>
                 <div class="corner bottom-right"></div>
             </div>
-            <div class="info-text">📱 Barkodu ekrana yerleştir</div>
+            <div class="info-text">📱 Barkodu kareye yerleştir</div>
         </div>
 
         <!-- RESULT -->
@@ -547,14 +784,17 @@
                     <button class="btn btn-copy" id="copyBtn">📋 Kopyala</button>
                     <button class="btn btn-approve" id="approveBtn">✓ Onayla</button>
                 </div>
-                <div class="status">✓ Tarandı</div>
+                <div class="status">✓ Başarıyla Tarandı</div>
             </div>
         </div>
 
         <!-- HISTORY -->
         <div class="history-panel" id="historyPanel">
             <div class="history-inner">
-                <div class="history-title">📜 Onaylı Taramalar</div>
+                <div class="history-header">
+                    <div class="history-title">📜 Onaylı Taramalar</div>
+                    <div class="history-count" id="historyCount">0</div>
+                </div>
                 <ul class="history-list" id="historyList"></ul>
             </div>
         </div>
@@ -563,7 +803,10 @@
     <!-- MODAL -->
     <div class="modal" id="confirmModal">
         <div class="modal-box">
-            <div class="modal-title">Listeye Ekle?</div>
+            <div class="modal-header">
+                <div class="modal-icon">✓</div>
+                <div class="modal-title">Listeye Ekle?</div>
+            </div>
             <div class="modal-text" id="modalText"></div>
             <div class="modal-buttons">
                 <button class="modal-btn modal-yes" id="modalYes">✓ Evet</button>
@@ -579,10 +822,12 @@
             history: [],
             pending: null,
             scanner: null,
-            audio: null
+            audio: null,
+            scanCount: 0
         };
 
         const DOM = {
+            scanCount: document.getElementById('scanCount'),
             resultPanel: document.getElementById('resultPanel'),
             resultText: document.getElementById('resultText'),
             resultFormat: document.getElementById('resultFormat'),
@@ -590,13 +835,14 @@
             approveBtn: document.getElementById('approveBtn'),
             historyPanel: document.getElementById('historyPanel'),
             historyList: document.getElementById('historyList'),
+            historyCount: document.getElementById('historyCount'),
             modal: document.getElementById('confirmModal'),
             modalText: document.getElementById('modalText'),
             modalYes: document.getElementById('modalYes'),
             modalNo: document.getElementById('modalNo')
         };
 
-        // Utilities
+        // ═══════ UTILITIES ═══════
         function sanitize(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -604,18 +850,26 @@
         }
 
         function isUrl(str) {
-            return str.startsWith('http://') || str.startsWith('https://');
+            try {
+                new URL(str);
+                return true;
+            } catch {
+                return false;
+            }
         }
 
         function getTime() {
             return new Date().toLocaleTimeString('tr-TR', { 
                 hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit' 
+                minute: '2-digit'
             });
         }
 
-        // Sound
+        function getDate() {
+            return new Date().toLocaleDateString('tr-TR');
+        }
+
+        // ═══════ SOUND ═══════
         function playBeep() {
             try {
                 if (!state.audio) {
@@ -631,29 +885,61 @@
                 g.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
                 o.start(t);
                 o.stop(t + 0.08);
+
+                setTimeout(() => {
+                    try {
+                        const o2 = state.audio.createOscillator();
+                        const g2 = state.audio.createGain();
+                        o2.connect(g2);
+                        g2.connect(state.audio.destination);
+                        o2.frequency.value = 1200;
+                        g2.gain.setValueAtTime(0.15, state.audio.currentTime);
+                        g2.gain.exponentialRampToValueAtTime(0.01, state.audio.currentTime + 0.08);
+                        o2.start(state.audio.currentTime);
+                        o2.stop(state.audio.currentTime + 0.08);
+                    } catch (e) {}
+                }, 100);
             } catch (e) {}
         }
 
-        // History
+        // ═══════ HISTORY ═══════
         function loadHistory() {
             try {
-                state.history = JSON.parse(localStorage.getItem('barcodes') || '[]');
+                state.history = JSON.parse(localStorage.getItem('barcodes_pro') || '[]');
             } catch {
                 state.history = [];
             }
+            updateScanCount();
         }
 
         function saveHistory() {
             try {
-                localStorage.setItem('barcodes', JSON.stringify(state.history));
+                localStorage.setItem('barcodes_pro', JSON.stringify(state.history));
             } catch {}
         }
 
         function addHistory(data) {
-            state.history.unshift({ data, time: new Date() });
-            if (state.history.length > 100) state.history.pop();
+            state.history.unshift({ 
+                data, 
+                time: new Date(),
+                id: Date.now()
+            });
+            if (state.history.length > 200) state.history.pop();
             saveHistory();
+            updateScanCount();
             drawHistory();
+        }
+
+        function deleteFromHistory(id) {
+            state.history = state.history.filter(item => item.id !== id);
+            saveHistory();
+            updateScanCount();
+            drawHistory();
+        }
+
+        function updateScanCount() {
+            DOM.scanCount.textContent = state.history.length;
+            DOM.historyCount.textContent = state.history.length;
         }
 
         function drawHistory() {
@@ -663,16 +949,22 @@
                 return;
             }
             DOM.historyPanel.classList.add('show');
-            state.history.slice(0, 15).forEach(item => {
+            state.history.slice(0, 20).forEach(item => {
                 const li = document.createElement('li');
                 li.className = 'history-item';
-                const txt = item.data.length > 30 ? item.data.substring(0, 30) + '...' : item.data;
-                li.innerHTML = `${sanitize(txt)}<div class="history-time">${getTime()}</div>`;
+                const txt = item.data.length > 25 
+                    ? item.data.substring(0, 25) + '...' 
+                    : item.data;
+                li.innerHTML = `
+                    <div class="history-item-text" title="${sanitize(item.data)}">${sanitize(txt)}</div>
+                    <div class="history-item-time">${getTime()}</div>
+                    <button class="history-item-delete" data-id="${item.id}">🗑</button>
+                `;
                 DOM.historyList.appendChild(li);
             });
         }
 
-        // Scan
+        // ═══════ SCANNER ═══════
         function onScan(text, result) {
             const now = Date.now();
             if (text === state.lastScanned && now - state.lastTime < 600) return;
@@ -698,7 +990,7 @@
             try {
                 const scanner = new Html5QrcodeScanner('reader', {
                     fps: 15,
-                    qrbox: { width: 180, height: 180 },
+                    qrbox: { width: 200, height: 200 },
                     facingMode: 'environment',
                     rememberLastUsedCamera: true,
                     supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
@@ -710,17 +1002,17 @@
             }
         }
 
-        // Events
+        // ═══════ EVENTS ═══════
         DOM.copyBtn.addEventListener('click', () => {
             if (!state.lastScanned) return;
             navigator.clipboard.writeText(state.lastScanned).then(() => {
                 const orig = DOM.copyBtn.textContent;
-                DOM.copyBtn.textContent = '✓ Kopyalandı';
+                DOM.copyBtn.textContent = '✓ Kopyalandı!';
                 DOM.copyBtn.disabled = true;
                 setTimeout(() => {
                     DOM.copyBtn.textContent = orig;
                     DOM.copyBtn.disabled = false;
-                }, 1200);
+                }, 1000);
             }).catch(() => {});
         });
 
@@ -749,12 +1041,23 @@
         });
 
         DOM.modal.addEventListener('click', (e) => {
-            if (e.target === DOM.modal) {
-                DOM.modalNo.click();
+            if (e.target === DOM.modal) DOM.modalNo.click();
+        });
+
+        DOM.historyList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('history-item-delete')) {
+                const id = parseInt(e.target.dataset.id);
+                deleteFromHistory(id);
             }
         });
 
-        // Init
+        // ═══════ KEYBOARD ═══════
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') DOM.modalNo.click();
+            if (e.key === 'Enter' && DOM.modal.classList.contains('active')) DOM.modalYes.click();
+        });
+
+        // ═══════ INIT ═══════
         document.addEventListener('DOMContentLoaded', () => {
             loadHistory();
             drawHistory();
